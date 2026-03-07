@@ -20,16 +20,18 @@ const Companies = () => {
     return (
         <div>
             <Navbar />
-            <div className='max-w-6xl mx-auto my-10'>
-                <div className='flex items-center justify-between my-5'>
+            <div className='max-w-6xl mx-auto my-10 px-4'>
+                <div className='flex items-center justify-between my-5 gap-2'>
                     <Input
-                        className="w-fit"
-                        placeholder="Filter by name"
+                        className="w-full md:w-fit"
+                        placeholder="Filter by name, role"
                         onChange={(e) => setInput(e.target.value)}
                     />
-                    <Button onClick={() => navigate("/admin/companies/create")}>New Company</Button>
+                    <Button onClick={() => navigate("/admin/companies/create")} className="whitespace-nowrap">New Company</Button>
                 </div>
-                <CompaniesTable/>
+                <div className='overflow-x-auto border border-gray-100 rounded-md'>
+                    <CompaniesTable/>
+                </div>
             </div>
         </div>
     )

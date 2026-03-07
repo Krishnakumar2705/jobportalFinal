@@ -113,8 +113,8 @@ const Signup = () => {
                             placeholder="patel@gmail.com"
                         />
                     </div>
-                    <div className='flex items-center justify-between'>
-                        <RadioGroup className="flex items-center gap-4 my-5">
+                    <div className='flex flex-col md:flex-row items-center justify-between gap-4'>
+                        <RadioGroup className="flex items-center gap-4 my-2 md:my-5">
                             <div className="flex items-center space-x-2">
                                 <Input
                                     type="radio"
@@ -138,13 +138,13 @@ const Signup = () => {
                                 <Label htmlFor="r2">Recruiter</Label>
                             </div>
                         </RadioGroup>
-                        <div className='flex items-center gap-2'>
-                            <Label>Profile</Label>
+                        <div className='flex items-center gap-2 w-full md:w-auto'>
+                            <Label className="whitespace-nowrap">Profile</Label>
                             <Input
                                 accept="image/*"
                                 type="file"
                                 onChange={changeFileHandler}
-                                className="cursor-pointer"
+                                className="cursor-pointer text-sm"
                             />
                         </div>
                     </div>
