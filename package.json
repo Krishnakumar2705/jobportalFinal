@@ -1,13 +1,12 @@
 {
-  "name": "jobportal-root",
+  "name": "jobportal-fullstack",
   "version": "1.0.0",
-  "description": "Root package for deploying frontend and backend together on Render",
+  "description": "Full Stack Job Portal",
   "scripts": {
-    "build": "npm run build --prefix frontend",
-    "install-backend": "npm install --prefix backend",
-    "install-frontend": "npm install --prefix frontend",
-    "render-postbuild": "npm run build",
-    "render-build": "npm run install-backend && npm run install-frontend && npm run render-postbuild",
-    "start": "npm start --prefix backend"
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd frontend && npm install",
+    "build-frontend": "cd frontend && npm run build",
+    "build": "npm run install-backend && npm run install-frontend && npm run build-frontend",
+    "start": "cd backend && npm start"
   }
 }
