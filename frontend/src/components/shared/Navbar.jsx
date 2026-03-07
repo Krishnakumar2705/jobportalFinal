@@ -29,7 +29,7 @@ const Navbar = () => {
         }
     }
     return (
-        <div className='bg-white'>
+        <div className='bg-white border-b-2 border-gray-200'>
             <div className='flex items-center justify-between mx-auto max-w-7xl h-16'>
                 <div>
                     <h1 className='text-2xl font-bold'>Job<span className='text-[#F83002]'>Portal</span></h1>
@@ -39,6 +39,7 @@ const Navbar = () => {
                         {
                             user && user.role === 'recruiter' ? (
                                 <>
+                                    <li><Link to="/">Home</Link></li>
                                     <li><Link to="/admin/companies">Companies</Link></li>
                                     <li><Link to="/admin/jobs">Jobs</Link></li>
                                 </>
@@ -62,15 +63,25 @@ const Navbar = () => {
                         ) : (
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Avatar className="cursor-pointer">
-                                        <AvatarImage src={user?.profile?.profilePhoto} alt="@shadcn" />
+                                    <Avatar className="cursor-pointer border-2 border-gray-800">
+                                        <AvatarImage src={user?.profile?.profilePhoto} alt="profile" />
+                                        {!user?.profile?.profilePhoto && (
+                                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                <User2 className="w-6 h-6 text-gray-600" />
+                                            </div>
+                                        )}
                                     </Avatar>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-80">
                                     <div className=''>
                                         <div className='flex gap-2 space-y-2'>
-                                            <Avatar className="cursor-pointer">
-                                                <AvatarImage src={user?.profile?.profilePhoto} alt="@shadcn" />
+                                            <Avatar className="cursor-pointer border-2 border-gray-800">
+                                                <AvatarImage src={user?.profile?.profilePhoto} alt="profile" />
+                                                {!user?.profile?.profilePhoto && (
+                                                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                        <User2 className="w-6 h-6 text-gray-600" />
+                                                    </div>
+                                                )}
                                             </Avatar>
                                             <div>
                                                 <h4 className='font-medium'>{user?.fullname}</h4>
@@ -78,14 +89,10 @@ const Navbar = () => {
                                             </div>
                                         </div>
                                         <div className='flex flex-col my-2 text-gray-600'>
-                                            {
-                                                user && user.role === 'student' && (
-                                                    <div className='flex w-fit items-center gap-2 cursor-pointer'>
-                                                        <User2 />
-                                                        <Button variant="link"> <Link to="/profile">View Profile</Link></Button>
-                                                    </div>
-                                                )
-                                            }
+                                            <div className='flex w-fit items-center gap-2 cursor-pointer'>
+                                                <User2 />
+                                                <Button variant="link"> <Link to="/profile">View Profile</Link></Button>
+                                            </div>
 
                                             <div className='flex w-fit items-center gap-2 cursor-pointer'>
                                                 <LogOut />

@@ -5,6 +5,8 @@ import { Company } from "./models/company.model.js";
 import { Job } from "./models/job.model.js";
 import bcrypt from "bcryptjs";
 
+import { faker } from "@faker-js/faker";
+
 dotenv.config();
 
 const seedData = async () => {
@@ -35,13 +37,13 @@ const seedData = async () => {
         console.log('Recruiter created');
 
         // Create companies
-        const companies = await Company.insertMany([
+        const companiesData = [
             {
                 name: "Tech Innovators Inc",
                 description: "Leading technology company specializing in AI and ML solutions",
                 website: "https://techinnovators.com",
                 location: "Bangalore",
-                logo: "https://via.placeholder.com/150",
+                logo: "https://ui-avatars.com/api/?name=Tech+Innovators&background=6366f1&color=fff&size=150&bold=true",
                 userId: recruiter._id
             },
             {
@@ -49,7 +51,7 @@ const seedData = async () => {
                 description: "Full-stack web development and digital marketing agency",
                 website: "https://digitalsolutions.com",
                 location: "Mumbai",
-                logo: "https://via.placeholder.com/150",
+                logo: "https://ui-avatars.com/api/?name=Digital+Solutions&background=8b5cf6&color=fff&size=150&bold=true",
                 userId: recruiter._id
             },
             {
@@ -57,7 +59,7 @@ const seedData = async () => {
                 description: "Award-winning design and branding agency",
                 website: "https://creativedesigns.com",
                 location: "Delhi NCR",
-                logo: "https://via.placeholder.com/150",
+                logo: "https://ui-avatars.com/api/?name=Creative+Designs&background=ec4899&color=fff&size=150&bold=true",
                 userId: recruiter._id
             },
             {
@@ -65,7 +67,7 @@ const seedData = async () => {
                 description: "Big data and analytics consulting firm",
                 website: "https://dataanalytics.com",
                 location: "Hyderabad",
-                logo: "https://via.placeholder.com/150",
+                logo: "https://ui-avatars.com/api/?name=Data+Analytics&background=14b8a6&color=fff&size=150&bold=true",
                 userId: recruiter._id
             },
             {
@@ -73,255 +75,76 @@ const seedData = async () => {
                 description: "Cloud infrastructure and DevOps solutions provider",
                 website: "https://cloudsystems.com",
                 location: "Pune",
-                logo: "https://via.placeholder.com/150",
+                logo: "https://ui-avatars.com/api/?name=Cloud+Systems&background=f59e0b&color=fff&size=150&bold=true",
                 userId: recruiter._id
             }
-        ]);
+        ];
+        
+        const companies = await Company.insertMany(companiesData);
         console.log('Companies created');
 
-        // Create jobs
-        const jobs = [
-            {
-                title: "Frontend Developer",
-                description: "We are looking for a skilled Frontend Developer to join our team. You will be responsible for building responsive and interactive web applications using modern frameworks.",
-                requirements: ["React.js", "JavaScript", "HTML/CSS", "Tailwind CSS", "Git"],
-                salary: 800000,
-                experienceLevel: 2,
-                location: "Bangalore",
-                jobType: "Full-time",
-                position: 3,
-                company: companies[0]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Backend Developer",
-                description: "Join our backend team to build scalable APIs and microservices. Experience with Node.js and databases required.",
-                requirements: ["Node.js", "Express.js", "MongoDB", "REST API", "Docker"],
-                salary: 900000,
-                experienceLevel: 3,
-                location: "Mumbai",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[1]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Full Stack Developer",
-                description: "Looking for a versatile Full Stack Developer who can work on both frontend and backend technologies.",
-                requirements: ["React.js", "Node.js", "MongoDB", "Express.js", "TypeScript"],
-                salary: 1200000,
-                experienceLevel: 4,
-                location: "Bangalore",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[0]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Data Scientist",
-                description: "Seeking a Data Scientist to analyze complex datasets and build machine learning models.",
-                requirements: ["Python", "Machine Learning", "TensorFlow", "Pandas", "SQL"],
-                salary: 1500000,
-                experienceLevel: 3,
-                location: "Hyderabad",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[3]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "UI/UX Designer",
-                description: "Creative UI/UX Designer needed to design beautiful and intuitive user interfaces.",
-                requirements: ["Figma", "Adobe XD", "Sketch", "Prototyping", "User Research"],
-                salary: 700000,
-                experienceLevel: 2,
-                location: "Delhi NCR",
-                jobType: "Full-time",
-                position: 1,
-                company: companies[2]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Graphic Designer",
-                description: "Join our creative team as a Graphic Designer to create stunning visual content.",
-                requirements: ["Photoshop", "Illustrator", "InDesign", "Branding", "Typography"],
-                salary: 600000,
-                experienceLevel: 1,
-                location: "Delhi NCR",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[2]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "DevOps Engineer",
-                description: "DevOps Engineer to manage cloud infrastructure and CI/CD pipelines.",
-                requirements: ["AWS", "Docker", "Kubernetes", "Jenkins", "Linux"],
-                salary: 1300000,
-                experienceLevel: 4,
-                location: "Pune",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[4]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Mobile App Developer",
-                description: "Develop cross-platform mobile applications using React Native or Flutter.",
-                requirements: ["React Native", "Flutter", "JavaScript", "Mobile UI", "API Integration"],
-                salary: 950000,
-                experienceLevel: 3,
-                location: "Bangalore",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[0]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "QA Engineer",
-                description: "Quality Assurance Engineer to ensure software quality through testing.",
-                requirements: ["Manual Testing", "Automation Testing", "Selenium", "JIRA", "API Testing"],
-                salary: 650000,
-                experienceLevel: 2,
-                location: "Mumbai",
-                jobType: "Full-time",
-                position: 3,
-                company: companies[1]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Product Manager",
-                description: "Lead product development and strategy for our flagship products.",
-                requirements: ["Product Strategy", "Agile", "User Stories", "Market Research", "Analytics"],
-                salary: 1800000,
-                experienceLevel: 5,
-                location: "Bangalore",
-                jobType: "Full-time",
-                position: 1,
-                company: companies[0]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Business Analyst",
-                description: "Analyze business requirements and translate them into technical specifications.",
-                requirements: ["Business Analysis", "SQL", "Excel", "Documentation", "Stakeholder Management"],
-                salary: 850000,
-                experienceLevel: 3,
-                location: "Hyderabad",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[3]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Digital Marketing Specialist",
-                description: "Drive digital marketing campaigns across multiple channels.",
-                requirements: ["SEO", "Google Ads", "Social Media Marketing", "Content Marketing", "Analytics"],
-                salary: 600000,
-                experienceLevel: 2,
-                location: "Mumbai",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[1]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Content Writer",
-                description: "Create engaging content for blogs, websites, and marketing materials.",
-                requirements: ["Content Writing", "SEO Writing", "Research", "Editing", "WordPress"],
-                salary: 450000,
-                experienceLevel: 1,
-                location: "Delhi NCR",
-                jobType: "Full-time",
-                position: 3,
-                company: companies[2]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Cybersecurity Analyst",
-                description: "Protect our systems and data from security threats.",
-                requirements: ["Network Security", "Penetration Testing", "SIEM", "Firewall", "Incident Response"],
-                salary: 1100000,
-                experienceLevel: 3,
-                location: "Pune",
-                jobType: "Full-time",
-                position: 1,
-                company: companies[4]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Machine Learning Engineer",
-                description: "Build and deploy machine learning models at scale.",
-                requirements: ["Python", "TensorFlow", "PyTorch", "MLOps", "Deep Learning"],
-                salary: 1600000,
-                experienceLevel: 4,
-                location: "Bangalore",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[0]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Frontend Developer Intern",
-                description: "Internship opportunity for aspiring frontend developers to learn and grow.",
-                requirements: ["HTML", "CSS", "JavaScript", "React basics", "Git"],
-                salary: 200000,
-                experienceLevel: 0,
-                location: "Mumbai",
-                jobType: "Internship",
-                position: 5,
-                company: companies[1]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Backend Developer Intern",
-                description: "Learn backend development with hands-on projects and mentorship.",
-                requirements: ["Node.js basics", "JavaScript", "Database basics", "Git", "Problem Solving"],
-                salary: 200000,
-                experienceLevel: 0,
-                location: "Bangalore",
-                jobType: "Internship",
-                position: 4,
-                company: companies[0]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Data Analyst",
-                description: "Analyze data and create reports to support business decisions.",
-                requirements: ["SQL", "Excel", "Power BI", "Python", "Statistics"],
-                salary: 700000,
-                experienceLevel: 2,
-                location: "Hyderabad",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[3]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "Cloud Architect",
-                description: "Design and implement cloud infrastructure solutions.",
-                requirements: ["AWS", "Azure", "Cloud Architecture", "Terraform", "Microservices"],
-                salary: 2000000,
-                experienceLevel: 6,
-                location: "Pune",
-                jobType: "Full-time",
-                position: 1,
-                company: companies[4]._id,
-                created_by: recruiter._id
-            },
-            {
-                title: "React Native Developer",
-                description: "Build mobile applications for iOS and Android using React Native.",
-                requirements: ["React Native", "JavaScript", "Redux", "Mobile Development", "REST API"],
-                salary: 1000000,
-                experienceLevel: 3,
-                location: "Bangalore",
-                jobType: "Full-time",
-                position: 2,
-                company: companies[0]._id,
-                created_by: recruiter._id
-            }
+        // Generate 150-200 Jobs using Faker
+        const jobRoles = [
+            { title: "Frontend Developer", reqs: ["React.js", "JavaScript", "HTML/CSS", "Tailwind CSS", "Git"] },
+            { title: "Backend Developer", reqs: ["Node.js", "Express.js", "MongoDB", "REST API", "Docker"] },
+            { title: "Full Stack Developer", reqs: ["React.js", "Node.js", "MongoDB", "Express.js", "TypeScript"] },
+            { title: "Data Scientist", reqs: ["Python", "Machine Learning", "TensorFlow", "Pandas", "SQL"] },
+            { title: "UI/UX Designer", reqs: ["Figma", "Adobe XD", "Sketch", "Prototyping", "User Research"] },
+            { title: "Graphic Designer", reqs: ["Photoshop", "Illustrator", "InDesign", "Branding", "Typography"] },
+            { title: "DevOps Engineer", reqs: ["AWS", "Docker", "Kubernetes", "Jenkins", "Linux"] },
+            { title: "Mobile App Developer", reqs: ["React Native", "Flutter", "JavaScript", "Mobile UI", "API Integration"] },
+            { title: "QA Engineer", reqs: ["Manual Testing", "Automation Testing", "Selenium", "JIRA", "API Testing"] },
+            { title: "Product Manager", reqs: ["Product Strategy", "Agile", "User Stories", "Market Research", "Analytics"] },
+            { title: "Business Analyst", reqs: ["Business Analysis", "SQL", "Excel", "Documentation", "Stakeholder"] },
+            { title: "Digital Marketing Specialist", reqs: ["SEO", "Google Ads", "Social Media", "Content", "Analytics"] },
+            { title: "Content Writer", reqs: ["Content Writing", "SEO Writing", "Research", "Editing", "WordPress"] },
+            { title: "Cybersecurity Analyst", reqs: ["Network Security", "Penetration Testing", "SIEM", "Firewall", "Incident"] },
+            { title: "Machine Learning Engineer", reqs: ["Python", "TensorFlow", "PyTorch", "MLOps", "Deep Learning"] },
+            { title: "Data Analyst", reqs: ["SQL", "Excel", "Power BI", "Python", "Statistics"] },
+            { title: "Cloud Architect", reqs: ["AWS", "Azure", "Cloud Architecture", "Terraform", "Microservices"] }
         ];
+
+        const locations = ["Bangalore", "Mumbai", "Delhi NCR", "Hyderabad", "Pune", "Chennai", "Gurgaon"];
+        const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"];
+
+        const jobs = [];
+        
+        // Create jobs with varied salary ranges
+        // 30% jobs in 0-42k range (internships, entry-level)
+        // 30% jobs in 42k-1lakh range (junior positions)
+        // 40% jobs in 1lakh+ range (experienced positions)
+        
+        for (let i = 0; i < 10; i++) {
+            for (const role of jobRoles) {
+                const randomCompany = companies[Math.floor(Math.random() * companies.length)];
+                
+                // Determine salary range based on iteration
+                let salary;
+                if (i < 3) {
+                    // 0-42k range (internships and entry-level)
+                    salary = faker.number.int({ min: 15000, max: 42000 });
+                } else if (i < 6) {
+                    // 42k-1lakh range (junior positions)
+                    salary = faker.number.int({ min: 42000, max: 100000 });
+                } else {
+                    // 1lakh+ range (experienced positions)
+                    salary = faker.number.int({ min: 100000, max: 2500000 });
+                }
+                
+                jobs.push({
+                    title: role.title,
+                    description: faker.lorem.paragraph(3) + " We are looking for passionate individuals.",
+                    requirements: role.reqs,
+                    salary: salary,
+                    experienceLevel: faker.number.int({ min: 0, max: 8 }),
+                    location: faker.helpers.arrayElement(locations),
+                    jobType: faker.helpers.arrayElement(jobTypes),
+                    position: faker.number.int({ min: 1, max: 10 }),
+                    company: randomCompany._id,
+                    created_by: recruiter._id
+                });
+            }
+        }
 
         await Job.insertMany(jobs);
         console.log('Jobs created successfully');

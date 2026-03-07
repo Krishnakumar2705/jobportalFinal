@@ -11,11 +11,29 @@ const fitlerData = [
     },
     {
         fitlerType: "Industry",
-        array: ["Frontend Developer", "Backend Developer", "FullStack Developer"]
+        array: [
+            "Frontend Developer",
+            "Backend Developer",
+            "Full Stack Developer",
+            "Data Scientist",
+            "Machine Learning Engineer",
+            "DevOps Engineer",
+            "UI/UX Designer",
+            "Graphic Designer",
+            "Mobile App Developer",
+            "QA Engineer",
+            "Product Manager",
+            "Business Analyst",
+            "Digital Marketing Specialist",
+            "Content Writer",
+            "Cybersecurity Analyst",
+            "Cloud Architect",
+            "Data Analyst"
+        ]
     },
     {
         fitlerType: "Salary",
-        array: ["0-40k", "42-1lakh", "1lakh to 5lakh"]
+        array: ["0-40k", "42-1lakh", "1lakh to 5lakh", "5lakh+"]
     },
 ]
 
