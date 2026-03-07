@@ -49,14 +49,14 @@ try {
 const PORT = process.env.PORT || 3000;
 console.log("==> Server will run on PORT:", PORT);
 
-// Health check endpoint
-app.get("/", (req, res) => {
+// Health check endpoint (moved to /api/health to not block React frontend)
+app.get("/api/health", (req, res) => {
     res.status(200).json({
         success: true,
         message: "Job Portal API is running"
     });
 });
-console.log("==> Health check endpoint registered");
+console.log("==> Health check endpoint registered at /api/health");
 
 // api's
 try {
