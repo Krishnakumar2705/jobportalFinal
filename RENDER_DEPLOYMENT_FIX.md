@@ -23,7 +23,7 @@ SECRET_KEY = jobportal123
 CLOUD_NAME = dwqtleat2
 API_KEY = 783645894966468
 API_SECRET = xIPI9v-hyYWAKrWvgxHIJUW80Ic
-FRONTEND_URL = http://localhost:5173
+FRONTEND_URL = https://jobportal-final-kj9g.onrender.com
 ```
 
 **IMPORTANT**: 
