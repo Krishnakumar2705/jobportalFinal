@@ -122,9 +122,9 @@ Should return jobs (requires authentication)
 - [ ] Service Type: **Web Service**
 - [ ] Repository: **Krishnakumar2705/jobportal**
 - [ ] Branch: **main**
-- [ ] Root Directory: **backend**
+- [ ] Root Directory: **(leave empty)**
 - [ ] Environment: **Node**
-- [ ] Build Command: **npm install**
+- [ ] Build Command: **npm run render-build**
 - [ ] Start Command: **npm start**
 - [ ] Instance Type: **Free**
 - [ ] All environment variables added
