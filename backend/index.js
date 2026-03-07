@@ -96,21 +96,20 @@ app.use((err, req, res, next) => {
 // Start server and connect to database
 const startServer = async () => {
     try {
-        console.log("==> Attempting to connect to MongoDB...");
-        await connectDB();
-        console.log("==> MongoDB connected successfully!");
-        
-        console.log("==> Starting Express server...");
+        console.log("==> Starting Express server first to pass Render health checks...");
         app.listen(PORT, '0.0.0.0', () => {
             console.log(`==> ✅ Server running successfully on port ${PORT}`);
             console.log(`==> Server is ready to accept connections`);
         });
+
+        console.log("==> Attempting to connect to MongoDB...");
+        await connectDB();
+        console.log("==> MongoDB connected successfully!");
     } catch (error) {
-        console.error("==> ❌ Failed to start server:");
+        console.error("==> ❌ Failed to connect to DB:");
         console.error("==> Error name:", error.name);
         console.error("==> Error message:", error.message);
         console.error("==> Error stack:", error.stack);
-        process.exit(1);
     }
 };
 
