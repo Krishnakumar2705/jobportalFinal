@@ -24,8 +24,8 @@ const AdminJobsTable = () => {
         setFilterJobs(filteredJobs);
     },[allAdminJobs,searchJobByText])
     return (
-        <div>
-            <Table>
+        <div className="overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-md">
+            <Table className="min-w-[600px]">
                 <TableCaption>A list of your recent  posted jobs</TableCaption>
                 <TableHeader>
                     <TableRow>
@@ -38,7 +38,7 @@ const AdminJobsTable = () => {
                 <TableBody>
                     {
                         filterJobs?.map((job) => (
-                            <tr>
+                            <tr key={job._id}>
                                 <TableCell>{job?.company?.name}</TableCell>
                                 <TableCell>{job?.title}</TableCell>
                                 <TableCell>{job?.createdAt.split("T")[0]}</TableCell>

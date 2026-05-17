@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 import crypto from "crypto";
-import sendEmail from "../utils/sendEmail.js";
+import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/sendEmail.js";
 
 export const register = async (req, res) => {
     try {
@@ -54,6 +54,9 @@ export const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+        const verificationTokenExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+
         const userCreated = await User.create({
             fullname,
             email,
@@ -63,11 +66,15 @@ export const register = async (req, res) => {
             profile: {
                 profilePhoto: cloudResponse?.secure_url || ""
             },
-            isVerified: true // Automatically verify user since OTP is removed
+            verificationToken,
+            verificationTokenExpire
         });
 
+        // Send OTP via Resend
+        await sendVerificationEmail(userCreated.email, verificationToken);
+
         return res.status(201).json({
-            message: "Account created successfully. You can now login.",
+            message: "Account created successfully. Please check your email to verify your account.",
             success: true
         });
 
@@ -293,14 +300,13 @@ export const forgotPassword = async (req, res) => {
         await user.save();
 
         const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-        const message = `You are receiving this email because you (or someone else) have requested the reset of a password. Please click on the link below to reset your password:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email.`;
-
+        
         try {
-            await sendEmail({
-                email: user.email,
-                subject: "JobPortal Password Reset",
-                message
-            });
+            const emailResult = await sendPasswordResetEmail(user.email, resetUrl);
+            
+            if (!emailResult.success) {
+                throw new Error("Resend failed to send email");
+            }
 
             return res.status(200).json({
                 message: "Password reset link sent to your email.",
@@ -458,13 +464,7 @@ export const resendOtp = async (req, res) => {
         user.verificationTokenExpire = Date.now() + 15 * 60 * 1000; // 15 mins
         await user.save();
 
-        const message = `Welcome to JobPortal! Your new verification code is: ${verificationToken}\n\nThis code will expire in 15 minutes.`;
-
-        await sendEmail({
-            email: user.email,
-            subject: "JobPortal New Verification Code",
-            message
-        });
+        await sendVerificationEmail(user.email, verificationToken);
 
         return res.status(200).json({
             message: "New verification code sent successfully.",

@@ -6,7 +6,8 @@ import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import useGetAllJobs from '@/hooks/useGetAllJobs';
 import { Button } from './ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from './ui/sheet';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
@@ -37,7 +38,28 @@ const Jobs = () => {
             <Navbar />
             <div className='max-w-7xl mx-auto mt-5 px-4 md:px-0'>
                 <div className='flex flex-col md:flex-row gap-5'>
-                    <div className='w-full md:w-[20%]'>
+                    {/* Mobile Filter Button */}
+                    <div className='md:hidden flex justify-between items-center bg-white dark:bg-gray-900 p-3 rounded-md shadow-sm border border-gray-100 dark:border-gray-800 sticky top-16 z-40'>
+                        <h1 className='font-bold text-gray-800 dark:text-gray-200'>Found {filterJobs.length} Jobs</h1>
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                                    <Filter className="h-4 w-4" /> Filters
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="bottom" className="h-[80vh] rounded-t-xl">
+                                <SheetHeader>
+                                    <SheetTitle>Filter Jobs</SheetTitle>
+                                </SheetHeader>
+                                <div className="mt-4 overflow-y-auto h-[90%] pb-10 custom-scrollbar pr-2">
+                                    <FilterCard />
+                                </div>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
+
+                    {/* Desktop Filter Sidebar */}
+                    <div className='hidden md:block w-full md:w-[20%]'>
                         <FilterCard />
                     </div>
                     {
