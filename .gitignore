@@ -33,3 +33,7 @@ Thumbs.db
 # Testing
 coverage/
 .nyc_output/
+
+# Sensitive deployment files
+RENDER_DEPLOYMENT_FIX.md
+RENDER_DEPLOY_COMMANDS.md
