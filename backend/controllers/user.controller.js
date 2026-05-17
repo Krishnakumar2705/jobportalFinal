@@ -17,6 +17,24 @@ export const register = async (req, res) => {
             });
         }
 
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                message: "Please enter a valid email address.",
+                success: false
+            });
+        }
+
+        // Phone number validation (exactly 10 digits)
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+            return res.status(400).json({
+                message: "Please enter a valid 10-digit phone number.",
+                success: false
+            });
+        }
+
         const file = req.file;
         let cloudResponse;
 
