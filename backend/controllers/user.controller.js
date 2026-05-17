@@ -54,9 +54,6 @@ export const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
-        const verificationTokenExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
-
         const userCreated = await User.create({
             fullname,
             email,
@@ -66,25 +63,11 @@ export const register = async (req, res) => {
             profile: {
                 profilePhoto: cloudResponse?.secure_url || ""
             },
-            verificationToken,
-            verificationTokenExpire
+            isVerified: true // Automatically verify user since OTP is removed
         });
 
-        const message = `Welcome to JobPortal! Your verification code is: ${verificationToken}\n\nThis code will expire in 15 minutes.\n\nIf you did not request this, please ignore this email.`;
-
-        try {
-            await sendEmail({
-                email: userCreated.email,
-                subject: "JobPortal Email Verification",
-                message
-            });
-        } catch (error) {
-            console.log("Email sending failed:", error);
-            // We don't want to fail the registration if email fails, but maybe log it.
-        }
-
         return res.status(201).json({
-            message: "Account created successfully. Please check your email to verify your account.",
+            message: "Account created successfully. You can now login.",
             success: true
         });
 

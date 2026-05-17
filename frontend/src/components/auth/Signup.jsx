@@ -51,7 +51,7 @@ const Signup = () => {
                 withCredentials: true,
             });
             if (res.data.success) {
-                navigate("/verify-email", { state: { email: input.email } });
+                navigate("/login");
                 toast.success(res.data.message);
             }
         } catch (error) {
