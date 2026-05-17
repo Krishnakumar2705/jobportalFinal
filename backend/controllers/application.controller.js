@@ -1,7 +1,7 @@
 import { Application } from "../models/application.model.js";
 import { Job } from "../models/job.model.js";
 import { User } from "../models/user.model.js";
-import sendEmail from "../utils/sendEmail.js";
+import { sendStatusUpdateEmail, sendApplicationConfirmationEmail } from "../utils/sendEmail.js";
 
 export const applyJob = async (req, res) => {
     try {
@@ -43,16 +43,7 @@ export const applyJob = async (req, res) => {
         // Send email notification to student
         const user = await User.findById(userId);
         if (user) {
-            const message = `Hello ${user.fullname},\n\nYou have successfully applied for the position of "${job.title}". The recruiter will review your application soon.\n\nBest of luck!\nJobPortal Team`;
-            try {
-                await sendEmail({
-                    email: user.email,
-                    subject: `Application Submitted: ${job.title}`,
-                    message
-                });
-            } catch (error) {
-                console.log("Application email failed:", error);
-            }
+            await sendApplicationConfirmationEmail(user.email, user.fullname, job.title);
         }
 
         return res.status(201).json({
@@ -142,27 +133,8 @@ export const updateStatus = async (req,res) => {
         if (populatedApplication && populatedApplication.applicant) {
             const student = populatedApplication.applicant;
             const jobTitle = populatedApplication.job.title;
-            const currentStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 
-            let message = `Hello ${student.fullname},\n\nYour application status for the position of "${jobTitle}" has been updated to: ${currentStatus}.`;
-            
-            if (status.toLowerCase() === 'accepted') {
-                message += "\n\nCongratulations! The recruiter will contact you for the next steps.";
-            } else if (status.toLowerCase() === 'shortlisted') {
-                message += "\n\nYou have been shortlisted! Keep an eye on your messages.";
-            }
-
-            message += "\n\nRegards,\nJobPortal Team";
-
-            try {
-                await sendEmail({
-                    email: student.email,
-                    subject: `Application Status Updated: ${jobTitle}`,
-                    message
-                });
-            } catch (error) {
-                console.log("Status update email failed:", error);
-            }
+            await sendStatusUpdateEmail(student.email, jobTitle, status);
         }
 
         return res.status(200).json({
