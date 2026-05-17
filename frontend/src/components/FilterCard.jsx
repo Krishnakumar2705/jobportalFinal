@@ -20,21 +20,14 @@ const filterData = [
             "Machine Learning Engineer",
             "DevOps Engineer",
             "UI/UX Designer",
-            "Graphic Designer",
-            "Mobile App Developer",
-            "QA Engineer",
             "Product Manager",
-            "Business Analyst",
-            "Digital Marketing Specialist",
-            "Content Writer",
-            "Cybersecurity Analyst",
-            "Cloud Architect",
+            "Digital Marketing",
             "Data Analyst"
         ]
     },
     {
-        filterType: "Salary",
-        array: ["0-40k", "42-1lakh", "1lakh to 5lakh", "5lakh+"]
+        filterType: "Employment Type",
+        array: ["Full Time", "Part Time", "Contractor", "Internship"]
     },
     {
         filterType: "Work Mode",
@@ -42,7 +35,7 @@ const filterData = [
     },
     {
         filterType: "Experience",
-        array: ["0-2 years", "2-5 years", "5-10 years", "10+ years"]
+        array: ["Fresher", "0-2 years", "2-5 years", "5-10 years", "10+ years"]
     }
 ]
 

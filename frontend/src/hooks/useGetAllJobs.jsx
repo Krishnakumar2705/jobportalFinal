@@ -7,13 +7,28 @@ import { useDispatch, useSelector } from 'react-redux'
 const useGetAllJobs = (page = 1) => {
     const [loading, setLoading] = useState(true);
     const dispatch = useDispatch();
-    const { searchedQuery } = useSelector(store => store.job);
+    const { searchedQuery, filterData } = useSelector(store => store.job) || {};
+
     useEffect(() => {
         const fetchAllJobs = async () => {
             try {
                 setLoading(true);
-                // Fetch from the live external jobs API instead of internal MongoDB jobs
-                const res = await axios.get(`${EXTERNAL_JOB_API_END_POINT}/live?page=${page}`, { withCredentials: true });
+                
+                // Build query params for JSearch backend
+                const queryParams = new URLSearchParams();
+                queryParams.append('page', page);
+                
+                if (searchedQuery) queryParams.append('keyword', searchedQuery);
+                if (filterData) {
+                    if (filterData.location) queryParams.append('location', filterData.location);
+                    if (filterData.industry) queryParams.append('industry', filterData.industry);
+                    if (filterData.workMode) queryParams.append('workMode', filterData.workMode);
+                    if (filterData.experience) queryParams.append('experience', filterData.experience);
+                    if (filterData.employmentType) queryParams.append('employmentType', filterData.employmentType);
+                }
+
+                const res = await axios.get(`${EXTERNAL_JOB_API_END_POINT}/live?${queryParams.toString()}`, { withCredentials: true });
+                
                 if (res.data.success) {
                     dispatch(setAllJobs(res.data.jobs));
                     dispatch(setPagination({
@@ -28,8 +43,14 @@ const useGetAllJobs = (page = 1) => {
                 setLoading(false);
             }
         }
-        fetchAllJobs();
-    }, [searchedQuery, page, dispatch])
+        
+        // Add a slight debounce to prevent spamming the RapidAPI endpoint
+        const timer = setTimeout(() => {
+            fetchAllJobs();
+        }, 300);
+        
+        return () => clearTimeout(timer);
+    }, [searchedQuery, filterData, page, dispatch])
 
     return { loading };
 }

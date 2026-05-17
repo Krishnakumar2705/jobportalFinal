@@ -18,59 +18,10 @@ const Jobs = () => {
     const [filterJobs, setFilterJobs] = useState(allJobs);
 
     useEffect(() => {
-        let filteredJobs = [...allJobs];
-
-        // 1. Filter by searchedQuery (Keyword from HeroSection or Browse)
-        if (searchedQuery) {
-            filteredJobs = filteredJobs.filter((job) => {
-                return job.title.toLowerCase().includes(searchedQuery.toLowerCase()) ||
-                    job.description.toLowerCase().includes(searchedQuery.toLowerCase()) ||
-                    job.location.toLowerCase().includes(searchedQuery.toLowerCase())
-            });
+        if (allJobs) {
+            setFilterJobs(allJobs);
         }
-
-        // 2. Filter by filterData (Sidebar independent categories)
-        if (filterData) {
-            const { location, industry, salary, workMode, experience } = filterData;
-
-            if (location) {
-                filteredJobs = filteredJobs.filter(job => 
-                    job.location.toLowerCase().includes(location.toLowerCase())
-                );
-            }
-            if (industry) {
-                filteredJobs = filteredJobs.filter(job => 
-                    job.title.toLowerCase().includes(industry.toLowerCase()) || 
-                    job.description.toLowerCase().includes(industry.toLowerCase())
-                );
-            }
-            if (salary) {
-                filteredJobs = filteredJobs.filter(job => {
-                    if (salary === '0-40k') return job.salary >= 0 && job.salary <= 40000;
-                    if (salary === '42-1lakh') return job.salary >= 42000 && job.salary <= 100000;
-                    if (salary === '1lakh to 5lakh') return job.salary >= 100000 && job.salary <= 500000;
-                    if (salary === '5lakh+') return job.salary >= 500000;
-                    return true;
-                });
-            }
-            if (workMode) {
-                filteredJobs = filteredJobs.filter(job => 
-                    job.workMode?.toLowerCase() === workMode.toLowerCase()
-                );
-            }
-            if (experience) {
-                filteredJobs = filteredJobs.filter(job => {
-                    if (experience === '0-2 years') return job.experienceLevel >= 0 && job.experienceLevel <= 2;
-                    if (experience === '2-5 years') return job.experienceLevel > 2 && job.experienceLevel <= 5;
-                    if (experience === '5-10 years') return job.experienceLevel > 5 && job.experienceLevel <= 10;
-                    if (experience === '10+ years') return job.experienceLevel > 10;
-                    return true;
-                });
-            }
-        }
-
-        setFilterJobs(filteredJobs)
-    }, [allJobs, searchedQuery, filterData]);
+    }, [allJobs]);
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= pagination.totalPages) {
