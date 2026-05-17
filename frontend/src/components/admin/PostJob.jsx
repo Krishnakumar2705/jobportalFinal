@@ -23,7 +23,8 @@ const PostJob = () => {
         jobType: "",
         experience: "",
         position: 0,
-        companyId: ""
+        companyId: "",
+        workMode: "On-site"
     });
     const [loading, setLoading]= useState(false);
     const navigate = useNavigate();
@@ -166,6 +167,18 @@ const PostJob = () => {
                                 </Select>
                             )
                         }
+                        <Select onValueChange={(value) => setInput({...input, workMode: value})}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select Work Mode" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="Remote">Remote</SelectItem>
+                                    <SelectItem value="Hybrid">Hybrid</SelectItem>
+                                    <SelectItem value="On-site">On-site</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </div> 
                     {
                         loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4">Post New Job</Button>

@@ -37,6 +37,14 @@ const userSchema = new mongoose.Schema({
     savedJobs:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Job'
-    }]
-},{timestamps:true});
+    }],
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    verificationToken: String,
+    verificationTokenExpire: Date,
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
+}, { timestamps: true });
 export const User = mongoose.model('User', userSchema);

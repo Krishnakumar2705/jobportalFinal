@@ -8,6 +8,8 @@ import userRoute from "./routes/user.route.js";
 import companyRoute from "./routes/company.route.js";
 import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
+import externalJobsRoute from "./routes/externalJobs.route.js";
+import analyzerRoute from "./routes/analyzer.route.js";
 
 console.log("==> Starting application...");
 
@@ -33,9 +35,23 @@ try {
     process.exit(1);
 }
 
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5175',
+    'http://localhost:5176'
+].filter(Boolean);
+
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials:true
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
 }
 
 try {
@@ -71,6 +87,12 @@ try {
     
     app.use("/api/v1/application", applicationRoute);
     console.log("==> Application routes registered");
+    
+    app.use("/api/v1/jobs", externalJobsRoute);
+    console.log("==> External Job routes registered");
+    
+    app.use("/api/v1/analyzer", analyzerRoute);
+    console.log("==> Analyzer routes registered");
 } catch (error) {
     console.error("==> Error registering routes:", error);
     process.exit(1);

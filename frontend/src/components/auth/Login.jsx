@@ -109,7 +109,10 @@ const Login = () => {
                     {
                         loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4">Login</Button>
                     }
-                    <span className='text-sm'>Don't have an account? <Link to="/signup" className='text-blue-600'>Signup</Link></span>
+                    <div className='flex items-center justify-between'>
+                        <span className='text-sm'>Don't have an account? <Link to="/signup" className='text-blue-600 font-medium'>Signup</Link></span>
+                        <Link to="/forgot-password" title="Forgot Password" id="forgot-password-link" className='text-sm text-blue-600 hover:underline font-medium'>Forgot Password?</Link>
+                    </div>
                 </form>
             </div>
         </div>

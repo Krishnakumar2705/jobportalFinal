@@ -2,7 +2,8 @@ import React from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { Button } from '../ui/button'
 import { Avatar, AvatarImage } from '../ui/avatar'
-import { LogOut, User2 } from 'lucide-react'
+import { LogOut, User2, Moon, Sun } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
@@ -14,6 +15,7 @@ const Navbar = () => {
     const { user } = useSelector(store => store.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { theme, setTheme } = useTheme();
 
     const logoutHandler = async () => {
         try {
@@ -29,7 +31,7 @@ const Navbar = () => {
         }
     }
     return (
-        <div className='bg-white border-b border-gray-200 sticky top-0 z-50'>
+        <div className='bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-300'>
             <div className='flex items-center justify-between mx-auto max-w-7xl h-16 px-4 md:px-0'>
                 <div>
                     <h1 className='text-xl md:text-2xl font-bold'>Job<span className='text-[#F83002]'>Portal</span></h1>
@@ -48,6 +50,8 @@ const Navbar = () => {
                                     <li><Link to="/">Home</Link></li>
                                     <li><Link to="/jobs">Jobs</Link></li>
                                     <li><Link to="/browse">Browse</Link></li>
+                                    <li><Link to="/saved-jobs">Saved Jobs</Link></li>
+                                    <li><Link to="/analyzer">Analyzer</Link></li>
                                 </>
                             )
                         }
@@ -101,6 +105,8 @@ const Navbar = () => {
                                                             <li><Link to="/" className="block py-1">Home</Link></li>
                                                             <li><Link to="/jobs" className="block py-1">Jobs</Link></li>
                                                             <li><Link to="/browse" className="block py-1">Browse</Link></li>
+                                                            <li><Link to="/saved-jobs" className="block py-1">Saved Jobs</Link></li>
+                                                            <li><Link to="/analyzer" className="block py-1">Analyzer</Link></li>
                                                         </>
                                                     )}
                                                 </ul>
@@ -120,6 +126,18 @@ const Navbar = () => {
                                 </Popover>
                             )
                         }
+                        
+                        {/* Dark Mode Toggle */}
+                        <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="rounded-full w-8 h-8 md:w-10 md:h-10 ml-2" 
+                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        >
+                            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                            <span className="sr-only">Toggle theme</span>
+                        </Button>
                     </div>
                 </div>
             </div>

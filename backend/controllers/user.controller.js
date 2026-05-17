@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
+import crypto from "crypto";
+import sendEmail from "../utils/sendEmail.js";
 
 export const register = async (req, res) => {
     try {
@@ -34,7 +36,10 @@ export const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await User.create({
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+        const verificationTokenExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+        const userCreated = await User.create({
             fullname,
             email,
             phoneNumber,
@@ -42,11 +47,26 @@ export const register = async (req, res) => {
             role,
             profile: {
                 profilePhoto: cloudResponse?.secure_url || ""
-            }
+            },
+            verificationToken,
+            verificationTokenExpire
         });
 
+        const message = `Welcome to JobPortal! Your verification code is: ${verificationToken}\n\nThis code will expire in 15 minutes.\n\nIf you did not request this, please ignore this email.`;
+
+        try {
+            await sendEmail({
+                email: userCreated.email,
+                subject: "JobPortal Email Verification",
+                message
+            });
+        } catch (error) {
+            console.log("Email sending failed:", error);
+            // We don't want to fail the registration if email fails, but maybe log it.
+        }
+
         return res.status(201).json({
-            message: "Account created successfully.",
+            message: "Account created successfully. Please check your email to verify your account.",
             success: true
         });
 
@@ -86,6 +106,13 @@ export const login = async (req, res) => {
         if (role !== user.role) {
             return res.status(400).json({
                 message: "Account doesn't exist with current role.",
+                success: false
+            });
+        }
+
+        if (!user.isVerified) {
+            return res.status(400).json({
+                message: "Please verify your email before logging in.",
                 success: false
             });
         }
@@ -194,5 +221,223 @@ export const updateProfile = async (req, res) => {
 
     } catch (error) {
         console.log(error);
+    }
+};
+
+export const verifyEmail = async (req, res) => {
+    try {
+        const { otp } = req.body;
+
+        const user = await User.findOne({
+            verificationToken: otp,
+            verificationTokenExpire: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                message: "Invalid or expired verification token.",
+                success: false
+            });
+        }
+
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        user.verificationTokenExpire = undefined;
+        await user.save();
+
+        return res.status(200).json({
+            message: "Email verified successfully. You can now login.",
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found with this email.",
+                success: false
+            });
+        }
+
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpire = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
+        await user.save();
+
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+        const message = `You are receiving this email because you (or someone else) have requested the reset of a password. Please click on the link below to reset your password:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email.`;
+
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: "JobPortal Password Reset",
+                message
+            });
+
+            return res.status(200).json({
+                message: "Password reset link sent to your email.",
+                success: true
+            });
+        } catch (error) {
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpire = undefined;
+            await user.save();
+
+            return res.status(500).json({
+                message: "Email could not be sent.",
+                success: false
+            });
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpire: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                message: "Invalid or expired reset token.",
+                success: false
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user.password = hashedPassword;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+
+        return res.status(200).json({
+            message: "Password reset successfully. You can now login with your new password.",
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const toggleSaveJob = async (req, res) => {
+    try {
+        const userId = req.id;
+        const jobId = req.params.id;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found.",
+                success: false
+            });
+        }
+
+        const isSaved = user.savedJobs.includes(jobId);
+
+        if (isSaved) {
+            // Unsave
+            user.savedJobs = user.savedJobs.filter(id => id.toString() !== jobId);
+            await user.save();
+            return res.status(200).json({
+                message: "Job removed from saved jobs.",
+                success: true,
+                isSaved: false
+            });
+        } else {
+            // Save
+            user.savedJobs.push(jobId);
+            await user.save();
+            return res.status(200).json({
+                message: "Job saved successfully.",
+                success: true,
+                isSaved: true
+            });
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const getSavedJobs = async (req, res) => {
+    try {
+        const userId = req.id;
+        const user = await User.findById(userId).populate({
+            path: 'savedJobs',
+            populate: {
+                path: 'company'
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found.",
+                success: false
+            });
+        }
+
+        return res.status(200).json({
+            savedJobs: user.savedJobs,
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const resendOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found.",
+                success: false
+            });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({
+                message: "Email is already verified.",
+                success: false
+            });
+        }
+
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+        user.verificationToken = verificationToken;
+        user.verificationTokenExpire = Date.now() + 15 * 60 * 1000; // 15 mins
+        await user.save();
+
+        const message = `Welcome to JobPortal! Your new verification code is: ${verificationToken}\n\nThis code will expire in 15 minutes.`;
+
+        await sendEmail({
+            email: user.email,
+            subject: "JobPortal New Verification Code",
+            message
+        });
+
+        return res.status(200).json({
+            message: "New verification code sent successfully.",
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Failed to resend OTP.",
+            success: false
+        });
     }
 };
