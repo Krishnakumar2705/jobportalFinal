@@ -8,41 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Once you add a custom domain to Resend, change this to 'support@yourdomain.com'
 const SENDER_EMAIL = 'onboarding@resend.dev'; 
 
-export const sendVerificationEmail = async (email, otp) => {
-    try {
-        const { data, error } = await resend.emails.send({
-            from: `JobPortal Support <${SENDER_EMAIL}>`,
-            to: [email],
-            subject: 'Verify Your JobPortal Account',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
-                    <h2 style="color: #6A38C2; text-align: center;">Welcome to JobPortal!</h2>
-                    <p style="color: #333; font-size: 16px;">Thank you for registering. Please use the verification code below to activate your account:</p>
-                    
-                    <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-radius: 5px; margin: 20px 0;">
-                        <h1 style="color: #0f172a; margin: 0; font-size: 32px; letter-spacing: 5px;">${otp}</h1>
-                    </div>
-                    
-                    <p style="color: #64748b; font-size: 14px;">This code will expire in exactly <strong>15 minutes</strong>.</p>
-                    <p style="color: #64748b; font-size: 14px;">If you did not request this account creation, please safely ignore this email.</p>
-                    
-                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
-                    <p style="color: #94a3b8; font-size: 12px; text-align: center;">&copy; ${new Date().getFullYear()} JobPortal Inc. All rights reserved.</p>
-                </div>
-            `,
-        });
 
-        if (error) {
-            console.error("Resend API Error (Verification):", error);
-            return { success: false, error };
-        }
-
-        return { success: true, data };
-    } catch (err) {
-        console.error("Failed to send verification email:", err);
-        return { success: false, error: err.message };
-    }
-};
 
 export const sendPasswordResetEmail = async (email, resetUrl) => {
     try {

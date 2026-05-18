@@ -28,6 +28,13 @@ const Login = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault();
+
+        // Gmail validation
+        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        if (!gmailRegex.test(input.email)) {
+            return toast.error("Only Gmail addresses (@gmail.com) are supported currently.");
+        }
+
         try {
             dispatch(setLoading(true));
             const res = await axios.post(`${USER_API_END_POINT}/login`, input, {

@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 import crypto from "crypto";
-import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/sendEmail.js";
+import { sendPasswordResetEmail } from "../utils/sendEmail.js";
 
 export const register = async (req, res) => {
     try {
@@ -17,11 +17,20 @@ export const register = async (req, res) => {
             });
         }
 
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        // Gmail validation
+        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        if (!gmailRegex.test(email)) {
             return res.status(400).json({
-                message: "Please enter a valid email address.",
+                message: "Only Gmail addresses (@gmail.com) are supported currently.",
+                success: false
+            });
+        }
+
+        // Strong password validation
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
                 success: false
             });
         }
@@ -54,9 +63,6 @@ export const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
-        const verificationTokenExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
-
         const userCreated = await User.create({
             fullname,
             email,
@@ -66,15 +72,11 @@ export const register = async (req, res) => {
             profile: {
                 profilePhoto: cloudResponse?.secure_url || ""
             },
-            verificationToken,
-            verificationTokenExpire
+            isVerified: true
         });
 
-        // Send OTP via Resend
-        await sendVerificationEmail(userCreated.email, verificationToken);
-
         return res.status(201).json({
-            message: "Account created successfully. Please check your email to verify your account.",
+            message: "Account created successfully. You can now login.",
             success: true
         });
 
@@ -99,6 +101,15 @@ export const login = async (req, res) => {
             });
         }
 
+        // Gmail validation
+        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        if (!gmailRegex.test(email)) {
+            return res.status(400).json({
+                message: "Only Gmail addresses (@gmail.com) are supported currently.",
+                success: false
+            });
+        }
+
         let user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({
@@ -118,13 +129,6 @@ export const login = async (req, res) => {
         if (role !== user.role) {
             return res.status(400).json({
                 message: "Account doesn't exist with current role.",
-                success: false
-            });
-        }
-
-        if (!user.isVerified) {
-            return res.status(400).json({
-                message: "Please verify your email before logging in.",
                 success: false
             });
         }
@@ -248,39 +252,7 @@ export const updateProfile = async (req, res) => {
     }
 };
 
-export const verifyEmail = async (req, res) => {
-    try {
-        const { otp } = req.body;
 
-        const user = await User.findOne({
-            verificationToken: otp,
-            verificationTokenExpire: { $gt: Date.now() }
-        });
-
-        if (!user) {
-            return res.status(400).json({
-                message: "Invalid or expired verification token.",
-                success: false
-            });
-        }
-
-        user.isVerified = true;
-        user.verificationToken = undefined;
-        user.verificationTokenExpire = undefined;
-        await user.save();
-
-        return res.status(200).json({
-            message: "Email verified successfully. You can now login.",
-            success: true
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: "Internal server error",
-            success: false
-        });
-    }
-};
 
 export const forgotPassword = async (req, res) => {
     try {
@@ -435,45 +407,6 @@ export const getSavedJobs = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             message: "Internal server error",
-            success: false
-        });
-    }
-};
-
-export const resendOtp = async (req, res) => {
-    try {
-        const { email } = req.body;
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found.",
-                success: false
-            });
-        }
-
-        if (user.isVerified) {
-            return res.status(400).json({
-                message: "Email is already verified.",
-                success: false
-            });
-        }
-
-        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
-        user.verificationToken = verificationToken;
-        user.verificationTokenExpire = Date.now() + 15 * 60 * 1000; // 15 mins
-        await user.save();
-
-        await sendVerificationEmail(user.email, verificationToken);
-
-        return res.status(200).json({
-            message: "New verification code sent successfully.",
-            success: true
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: "Failed to resend OTP.",
             success: false
         });
     }

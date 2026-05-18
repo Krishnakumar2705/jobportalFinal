@@ -17,7 +17,6 @@ import Applicants from './components/admin/Applicants'
 import ProtectedRoute from './components/admin/ProtectedRoute'
 import ForgotPassword from './components/auth/ForgotPassword'
 import ResetPassword from './components/auth/ResetPassword'
-import VerifyEmail from './components/auth/VerifyEmail'
 import SavedJobs from './components/SavedJobs'
 
 
@@ -86,10 +85,6 @@ const appRouter = createBrowserRouter([
   {
     path: "/reset-password/:token",
     element: <ResetPassword />
-  },
-  {
-    path: "/verify-email",
-    element: <VerifyEmail />
   },
   {
     path: "/saved-jobs",

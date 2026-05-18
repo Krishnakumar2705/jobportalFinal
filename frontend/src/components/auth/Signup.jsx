@@ -34,6 +34,19 @@ const Signup = () => {
     }
     const submitHandler = async (e) => {
         e.preventDefault();
+
+        // Gmail validation
+        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+        if (!gmailRegex.test(input.email)) {
+            return toast.error("Only Gmail addresses (@gmail.com) are supported currently.");
+        }
+
+        // Strong password validation
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(input.password)) {
+            return toast.error("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
+        }
+
         const formData = new FormData();    //formdata object
         formData.append("fullname", input.fullname);
         formData.append("email", input.email);
@@ -51,7 +64,7 @@ const Signup = () => {
                 withCredentials: true,
             });
             if (res.data.success) {
-                navigate("/verify-email", { state: { email: input.email } });
+                navigate("/login");
                 toast.success(res.data.message);
             }
         } catch (error) {

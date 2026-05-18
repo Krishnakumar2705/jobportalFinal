@@ -1,5 +1,5 @@
 import express from "express";
-import { forgotPassword, getSavedJobs, login, logout, register, resetPassword, toggleSaveJob, updateProfile, verifyEmail, resendOtp } from "../controllers/user.controller.js";
+import { forgotPassword, getSavedJobs, login, logout, register, resetPassword, toggleSaveJob, updateProfile } from "../controllers/user.controller.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
 import { singleUpload } from "../middlewares/mutler.js";
  
@@ -9,8 +9,6 @@ router.route("/register").post(singleUpload,register);
 router.route("/login").post(login);
 router.route("/logout").get(logout);
 router.route("/profile/update").post(isAuthenticated,singleUpload,updateProfile);
-router.route("/verify-email").post(verifyEmail);
-router.route("/resend-otp").post(resendOtp);
 router.route("/forgot-password").post(forgotPassword);
 router.route("/reset-password/:token").post(resetPassword);
 router.route("/save-job/:id").get(isAuthenticated, toggleSaveJob);
