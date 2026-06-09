@@ -1,5 +1,5 @@
 import express from "express";
-import { forgotPassword, getSavedJobs, login, logout, register, resetPassword, toggleSaveJob, updateProfile } from "../controllers/user.controller.js";
+import { login, logout, register, updateProfile, clerkSync } from "../controllers/user.controller.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
 import { singleUpload } from "../middlewares/mutler.js";
  
@@ -8,11 +8,8 @@ const router = express.Router();
 router.route("/register").post(singleUpload,register);
 router.route("/login").post(login);
 router.route("/logout").get(logout);
+router.route("/clerk-sync").post(clerkSync);
 router.route("/profile/update").post(isAuthenticated,singleUpload,updateProfile);
-router.route("/forgot-password").post(forgotPassword);
-router.route("/reset-password/:token").post(resetPassword);
-router.route("/save-job/:id").get(isAuthenticated, toggleSaveJob);
-router.route("/saved-jobs").get(isAuthenticated, getSavedJobs);
 
 export default router;
 

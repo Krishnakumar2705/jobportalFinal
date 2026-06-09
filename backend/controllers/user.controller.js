@@ -3,8 +3,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
-import crypto from "crypto";
-import { sendPasswordResetEmail } from "../utils/sendEmail.js";
 
 export const register = async (req, res) => {
     try {
@@ -13,33 +11,6 @@ export const register = async (req, res) => {
         if (!fullname || !email || !phoneNumber || !password || !role) {
             return res.status(400).json({
                 message: "Something is missing",
-                success: false
-            });
-        }
-
-        // Gmail validation
-        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-        if (!gmailRegex.test(email)) {
-            return res.status(400).json({
-                message: "Only Gmail addresses (@gmail.com) are supported currently.",
-                success: false
-            });
-        }
-
-        // Strong password validation
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        if (!passwordRegex.test(password)) {
-            return res.status(400).json({
-                message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
-                success: false
-            });
-        }
-
-        // Phone number validation (exactly 10 digits)
-        const phoneRegex = /^\d{10}$/;
-        if (!phoneRegex.test(phoneNumber)) {
-            return res.status(400).json({
-                message: "Please enter a valid 10-digit phone number.",
                 success: false
             });
         }
@@ -63,7 +34,7 @@ export const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const userCreated = await User.create({
+        await User.create({
             fullname,
             email,
             phoneNumber,
@@ -71,21 +42,16 @@ export const register = async (req, res) => {
             role,
             profile: {
                 profilePhoto: cloudResponse?.secure_url || ""
-            },
-            isVerified: true
+            }
         });
 
         return res.status(201).json({
-            message: "Account created successfully. You can now login.",
+            message: "Account created successfully.",
             success: true
         });
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            message: "Internal server error",
-            success: false
-        });
     }
 };
 
@@ -97,15 +63,6 @@ export const login = async (req, res) => {
         if (!email || !password || !role) {
             return res.status(400).json({
                 message: "Something is missing",
-                success: false
-            });
-        }
-
-        // Gmail validation
-        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-        if (!gmailRegex.test(email)) {
-            return res.status(400).json({
-                message: "Only Gmail addresses (@gmail.com) are supported currently.",
                 success: false
             });
         }
@@ -163,10 +120,6 @@ export const login = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            message: "Internal server error",
-            success: false
-        });
     }
 };
 
@@ -179,10 +132,6 @@ export const logout = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            message: "Internal server error",
-            success: false
-        });
     }
 };
 
@@ -245,168 +194,78 @@ export const updateProfile = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
-            message: "Internal server error",
-            success: false
-        });
     }
 };
 
-
-
-export const forgotPassword = async (req, res) => {
+export const clerkSync = async (req, res) => {
     try {
-        const { email } = req.body;
-        const user = await User.findOne({ email });
+        const { email, fullname, imageUrl, role } = req.body;
 
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found with this email.",
+        if (!email || !fullname) {
+            return res.status(400).json({
+                message: "Missing required fields",
                 success: false
             });
         }
 
-        const resetToken = crypto.randomBytes(20).toString('hex');
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpire = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
-        await user.save();
+        let user = await User.findOne({ email });
 
-        const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-        
-        try {
-            const emailResult = await sendPasswordResetEmail(user.email, resetUrl);
-            
-            if (!emailResult.success) {
-                throw new Error("Resend failed to send email");
+        if (!user) {
+            // User doesn't exist. If they provided a role, register them.
+            if (!role) {
+                return res.status(200).json({
+                    message: "Role selection required",
+                    needsRole: true,
+                    success: true
+                });
             }
 
-            return res.status(200).json({
-                message: "Password reset link sent to your email.",
+            // Create a new user with a dummy/empty password (since they login via Clerk)
+            const hashedPassword = await bcrypt.hash(Math.random().toString(36), 10);
+            user = await User.create({
+                fullname,
+                email,
+                phoneNumber: "", // default empty
+                password: hashedPassword,
+                role,
+                profile: {
+                    profilePhoto: imageUrl || ""
+                }
+            });
+        }
+
+        // Generate token and log in
+        const tokenData = {
+            userId: user._id
+        };
+        const token = jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: "1d" });
+
+        const userData = {
+            _id: user._id,
+            fullname: user.fullname,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            role: user.role,
+            profile: user.profile
+        };
+
+        return res
+            .status(200)
+            .cookie("token", token, {
+                maxAge: 1 * 24 * 60 * 60 * 1000,
+                httpOnly: true,
+                sameSite: "strict"
+            })
+            .json({
+                message: `Welcome back ${user.fullname}`,
+                user: userData,
                 success: true
             });
-        } catch (error) {
-            user.resetPasswordToken = undefined;
-            user.resetPasswordExpire = undefined;
-            await user.save();
 
-            return res.status(500).json({
-                message: "Email could not be sent.",
-                success: false
-            });
-        }
     } catch (error) {
         console.log(error);
         return res.status(500).json({
-            message: "Internal server error",
-            success: false
-        });
-    }
-};
-
-export const resetPassword = async (req, res) => {
-    try {
-        const { token } = req.params;
-        const { password } = req.body;
-
-        const user = await User.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpire: { $gt: Date.now() }
-        });
-
-        if (!user) {
-            return res.status(400).json({
-                message: "Invalid or expired reset token.",
-                success: false
-            });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        user.password = hashedPassword;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-        await user.save();
-
-        return res.status(200).json({
-            message: "Password reset successfully. You can now login with your new password.",
-            success: true
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: "Internal server error",
-            success: false
-        });
-    }
-};
-
-export const toggleSaveJob = async (req, res) => {
-    try {
-        const userId = req.id;
-        const jobId = req.params.id;
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found.",
-                success: false
-            });
-        }
-
-        const isSaved = user.savedJobs.includes(jobId);
-
-        if (isSaved) {
-            // Unsave
-            user.savedJobs = user.savedJobs.filter(id => id.toString() !== jobId);
-            await user.save();
-            return res.status(200).json({
-                message: "Job removed from saved jobs.",
-                success: true,
-                isSaved: false
-            });
-        } else {
-            // Save
-            user.savedJobs.push(jobId);
-            await user.save();
-            return res.status(200).json({
-                message: "Job saved successfully.",
-                success: true,
-                isSaved: true
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: "Internal server error",
-            success: false
-        });
-    }
-};
-
-export const getSavedJobs = async (req, res) => {
-    try {
-        const userId = req.id;
-        const user = await User.findById(userId).populate({
-            path: 'savedJobs',
-            populate: {
-                path: 'company'
-            }
-        });
-
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found.",
-                success: false
-            });
-        }
-
-        return res.status(200).json({
-            savedJobs: user.savedJobs,
-            success: true
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: "Internal server error",
+            message: "Internal server error during Clerk sync",
             success: false
         });
     }

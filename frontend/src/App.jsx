@@ -7,7 +7,6 @@ import Jobs from './components/Jobs'
 import Browse from './components/Browse'
 import Profile from './components/Profile'
 import JobDescription from './components/JobDescription'
-import ResumeAnalyzer from './components/ResumeAnalyzer'
 import Companies from './components/admin/Companies'
 import CompanyCreate from './components/admin/CompanyCreate'
 import CompanySetup from './components/admin/CompanySetup'
@@ -15,9 +14,7 @@ import AdminJobs from "./components/admin/AdminJobs";
 import PostJob from './components/admin/PostJob'
 import Applicants from './components/admin/Applicants'
 import ProtectedRoute from './components/admin/ProtectedRoute'
-import ForgotPassword from './components/auth/ForgotPassword'
-import ResetPassword from './components/auth/ResetPassword'
-import SavedJobs from './components/SavedJobs'
+import ClerkSync from './components/auth/ClerkSync'
 
 
 const appRouter = createBrowserRouter([
@@ -49,10 +46,6 @@ const appRouter = createBrowserRouter([
     path: "/profile",
     element: <Profile />
   },
-  {
-    path: "/analyzer",
-    element: <ResumeAnalyzer />
-  },
   // admin ke liye yha se start hoga
   {
     path:"/admin/companies",
@@ -78,24 +71,13 @@ const appRouter = createBrowserRouter([
     path:"/admin/jobs/:id/applicants",
     element:<ProtectedRoute><Applicants/></ProtectedRoute> 
   },
-  {
-    path: "/forgot-password",
-    element: <ForgotPassword />
-  },
-  {
-    path: "/reset-password/:token",
-    element: <ResetPassword />
-  },
-  {
-    path: "/saved-jobs",
-    element: <SavedJobs />
-  },
 
 ])
 function App() {
 
   return (
     <div>
+      <ClerkSync />
       <RouterProvider router={appRouter} />
     </div>
   )
