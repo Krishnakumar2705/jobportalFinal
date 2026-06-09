@@ -9,11 +9,13 @@ import { USER_API_END_POINT } from '@/utils/constant'
 import { toast } from 'sonner'
 import { useDispatch, useSelector } from 'react-redux'
 import { setUser } from '@/redux/authSlice'
+import { useClerk } from '@clerk/react'
 
 const Job = ({ job }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { user } = useSelector(store => store.auth);
+    const { openSignIn } = useClerk();
     
     // Check if job is already saved
     const [isSaved, setIsSaved] = useState(user?.savedJobs?.includes(job?._id));
@@ -28,7 +30,7 @@ const Job = ({ job }) => {
     const saveJobHandler = async () => {
         if (!user) {
             toast.error("Please login to save jobs");
-            return navigate("/login");
+            return openSignIn();
         }
         try {
             const res = await axios.get(`${USER_API_END_POINT}/save-job/${job?._id}`, { withCredentials: true });
